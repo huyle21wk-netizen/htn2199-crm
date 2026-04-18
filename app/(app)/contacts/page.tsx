@@ -1,8 +1,18 @@
-export default function ContactsPage() {
+import { createClient } from '@/lib/supabase/server'
+import { ContactsClient } from './contacts-client'
+
+export default async function ContactsPage() {
+  const supabase = await createClient()
+
+  const [{ data: stages }, { data: projects }] = await Promise.all([
+    supabase.from('stages').select('*').order('position'),
+    supabase.from('projects').select('*').order('name'),
+  ])
+
   return (
-    <div className="space-y-2">
-      <h1 className="text-2xl font-semibold">Liên hệ</h1>
-      <p className="text-muted-foreground">Sắp có — danh sách khách hàng sẽ hiển thị ở đây.</p>
-    </div>
-  );
+    <ContactsClient
+      stages={stages ?? []}
+      projects={projects ?? []}
+    />
+  )
 }
