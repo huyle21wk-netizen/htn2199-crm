@@ -13,7 +13,6 @@ const items = [
     icon: Layers,
     title: 'Giai đoạn',
     desc: 'Tuỳ chỉnh các bước trong quy trình bán hàng',
-    soon: true,
   },
   {
     href: '/settings/bad-numbers',
