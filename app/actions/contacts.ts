@@ -133,6 +133,20 @@ export async function getExistingSources() {
   return sources
 }
 
+export async function updateContactStage(contactId: string, stageId: string) {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('contacts')
+    .update({ stage_id: stageId, updated_at: new Date().toISOString() })
+    .eq('id', contactId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/kanban')
+  return { success: true }
+}
+
 export async function importContacts(
   rows: Array<{
     name: string
