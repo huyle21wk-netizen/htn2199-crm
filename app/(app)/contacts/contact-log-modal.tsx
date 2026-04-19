@@ -58,12 +58,14 @@ interface ContactLogModalProps {
   contact: Contact
   stages: Stage[]
   defaultChannel?: LogChannel
+  defaultScheduledFor?: string
   onClose: (saved: boolean) => void
 }
 
 export function ContactLogModal({
   contact,
   defaultChannel,
+  defaultScheduledFor,
   onClose,
 }: ContactLogModalProps) {
   const [submitting, setSubmitting] = useState(false)
@@ -80,7 +82,7 @@ export function ContactLogModal({
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      scheduled_for: toDatetimeLocal(new Date()),
+      scheduled_for: defaultScheduledFor ?? toDatetimeLocal(new Date()),
       channel: defaultChannel ?? 'call',
       status: 'done',
       outcome: '',
