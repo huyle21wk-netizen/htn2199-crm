@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import { format, startOfDay } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { useRouter } from 'next/navigation'
-import { X } from 'lucide-react'
+import { X, ClipboardCopy, Check } from 'lucide-react'
+import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 
@@ -33,6 +34,7 @@ export function EndOfDayWidget() {
   const [visible, setVisible] = useState(false)
   const [summary, setSummary] = useState<DaySummary | null>(null)
   const [loading, setLoading] = useState(true)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     if (!shouldShow()) return
@@ -77,6 +79,34 @@ export function EndOfDayWidget() {
   const handleDismiss = () => {
     sessionStorage.setItem(getDismissKey(), '1')
     setVisible(false)
+  }
+
+  const handleCopyReport = async (s: DaySummary) => {
+    const dateStr = format(new Date(), 'dd/MM/yyyy')
+    const lines: string[] = [
+      `Báo cáo ngày ${dateStr}:`,
+      `- Tổng liên hệ: ${s.total}`,
+      `- Quan tâm: ${s.interested}`,
+      `- Không quan tâm: ${s.notInterested}`,
+      `- Không nghe máy: ${s.noAnswer}`,
+    ]
+
+    if (s.interestedContacts.length > 0) {
+      lines.push('')
+      lines.push('Khách quan tâm:')
+      s.interestedContacts.forEach((c, i) => {
+        if (c.note) {
+          lines.push(`${i + 1}. ${c.name} - ${c.phone} - ${c.note}`)
+        } else {
+          lines.push(`${i + 1}. ${c.name} - ${c.phone}`)
+        }
+      })
+    }
+
+    await navigator.clipboard.writeText(lines.join('\n'))
+    toast.success('Đã copy báo cáo · Paste vào Zalo là xong 👍')
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   if (!visible) return null
@@ -140,14 +170,25 @@ export function EndOfDayWidget() {
             </div>
           )}
 
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full text-xs"
-            onClick={() => router.push('/report')}
-          >
-            Xem báo cáo đầy đủ →
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 text-xs gap-1.5"
+              onClick={() => handleCopyReport(summary!)}
+            >
+              {copied ? <Check className="h-3.5 w-3.5" /> : <ClipboardCopy className="h-3.5 w-3.5" />}
+              Copy báo cáo
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 text-xs"
+              onClick={() => router.push('/report')}
+            >
+              Xem báo cáo đầy đủ →
+            </Button>
+          </div>
         </>
       ) : null}
     </div>
