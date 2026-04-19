@@ -1,8 +1,18 @@
-export default function CalendarPage() {
+import { createClient } from '@/lib/supabase/server'
+import { CalendarClient } from './calendar-client'
+
+export default async function CalendarPage() {
+  const supabase = await createClient()
+
+  const [{ data: stages }, { data: projects }] = await Promise.all([
+    supabase.from('stages').select('*').order('position'),
+    supabase.from('projects').select('*').order('name'),
+  ])
+
   return (
-    <div className="space-y-2">
-      <h1 className="text-2xl font-semibold">Lịch</h1>
-      <p className="text-muted-foreground">Sắp có — lịch follow-up sẽ hiển thị ở đây.</p>
-    </div>
-  );
+    <CalendarClient
+      stages={stages ?? []}
+      projects={projects ?? []}
+    />
+  )
 }
