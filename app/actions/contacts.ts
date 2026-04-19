@@ -88,6 +88,17 @@ export async function updateContact(
   return { success: true }
 }
 
+export async function restoreFromBadNumbers(id: string) {
+  const supabase = await createClient()
+  const { data: rawStage } = await supabase.from('stages').select('id').eq('is_raw', true).single()
+  if (!rawStage) return { error: 'Không tìm thấy giai đoạn Raw.' }
+  const { error } = await supabase.from('contacts').update({ stage_id: rawStage.id }).eq('id', id)
+  if (error) return { error: error.message }
+  revalidatePath('/contacts')
+  revalidatePath('/settings/bad-numbers')
+  return { success: true }
+}
+
 export async function deleteContact(id: string) {
   const supabase = await createClient()
 

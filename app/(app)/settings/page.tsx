@@ -19,7 +19,6 @@ const items = [
     icon: Trash2,
     title: 'Số rác',
     desc: 'Xem, export hoặc xoá các số điện thoại rác',
-    soon: true,
   },
   {
     href: '/settings/account',
