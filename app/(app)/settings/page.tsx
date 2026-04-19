@@ -25,7 +25,6 @@ const items = [
     icon: User,
     title: 'Tài khoản',
     desc: 'Thông tin tài khoản và đăng xuất',
-    soon: true,
   },
 ]
 
@@ -36,32 +35,17 @@ export default function SettingsPage() {
       <div className="grid gap-2">
         {items.map((item) => {
           const Icon = item.icon
-          const content = (
-            <div className="flex items-center gap-3 p-4 border border-border rounded-lg hover:bg-secondary/30 transition-colors">
-              <div className="p-2 rounded-md bg-accent">
-                <Icon className="h-4 w-4 text-primary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium">{item.title}</p>
-                  {item.soon && (
-                    <span className="text-xs text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">
-                      Sắp có
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
-              </div>
-            </div>
-          )
-
-          return item.soon ? (
-            <div key={item.href} className="opacity-60 cursor-not-allowed">
-              {content}
-            </div>
-          ) : (
+          return (
             <Link key={item.href} href={item.href}>
-              {content}
+              <div className="flex items-center gap-3 p-4 border border-border rounded-lg hover:bg-secondary/30 transition-colors">
+                <div className="p-2 rounded-md bg-accent">
+                  <Icon className="h-4 w-4 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium">{item.title}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                </div>
+              </div>
             </Link>
           )
         })}
