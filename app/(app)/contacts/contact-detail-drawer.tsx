@@ -7,6 +7,7 @@ import {
   X,
   Pencil,
   Trash2,
+  MessageSquare,
   MessageCircle,
   Phone,
   FileText,
@@ -38,9 +39,12 @@ import {
 import { createClient } from '@/lib/supabase/client'
 import { phoneForUrl } from '@/lib/phone'
 import { deleteLog } from '@/app/actions/logs'
+import { PhoneDisplay } from '@/components/phone-display'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { Contact, ContactLog, Stage, Project } from '@/lib/types'
 import { CHANNEL_LABELS, OUTCOME_LABELS } from '@/lib/types'
+
+const QUICK_LOG_KEY = 'crm-quick-log-pending'
 
 interface ContactDetailDrawerProps {
   contact: Contact
@@ -51,6 +55,8 @@ interface ContactDetailDrawerProps {
   onDelete: (contact: Contact) => void
   onNewLog: (contact: Contact) => void
   onZalo: (contact: Contact) => void
+  onCall?: (contact: Contact) => void
+  onSms?: (contact: Contact) => void
   onRefresh: () => void
 }
 
@@ -62,11 +68,24 @@ export function ContactDetailDrawer({
   onDelete,
   onNewLog,
   onZalo,
+  onCall,
+  onSms,
   onRefresh,
 }: ContactDetailDrawerProps) {
   const supabase = createClient()
   const [logs, setLogs] = useState<ContactLog[]>([])
   const [loading, setLoading] = useState(true)
+
+  const defaultCall = (c: Contact) => {
+    sessionStorage.setItem(QUICK_LOG_KEY, JSON.stringify({ contactId: c.id, channel: 'call', triggeredAt: Date.now() }))
+    window.location.href = `tel:${phoneForUrl(c.phone)}`
+  }
+  const defaultSms = (c: Contact) => {
+    sessionStorage.setItem(QUICK_LOG_KEY, JSON.stringify({ contactId: c.id, channel: 'sms', triggeredAt: Date.now() }))
+    window.location.href = `sms:${phoneForUrl(c.phone)}`
+  }
+  const handleCall = onCall ?? defaultCall
+  const handleSms = onSms ?? defaultSms
 
   const stage = stages.find((s) => s.id === contact.stage_id)
 
@@ -98,8 +117,8 @@ export function ContactDetailDrawer({
               <SheetTitle className="text-base font-semibold truncate">
                 {contact.name}
               </SheetTitle>
-              <p className="text-sm text-muted-foreground font-mono mt-0.5">
-                {contact.phone}
+              <p className="text-sm text-muted-foreground mt-0.5">
+                <PhoneDisplay phone={contact.phone} />
               </p>
               <div className="mt-2">
                 <Badge
@@ -118,9 +137,27 @@ export function ContactDetailDrawer({
               <Button
                 variant="ghost"
                 size="icon-sm"
+                onClick={() => handleCall(contact)}
+                title="Gọi điện"
+                aria-label="Gọi điện"
+              >
+                <Phone className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => handleSms(contact)}
+                title="Nhắn tin SMS"
+                aria-label="Nhắn tin SMS"
+              >
+                <MessageSquare className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-sm"
                 onClick={() => onZalo(contact)}
-                title="Zalo"
-                aria-label="Mở Zalo"
+                title="Nhắn Zalo"
+                aria-label="Nhắn Zalo"
               >
                 <MessageCircle className="h-4 w-4" />
               </Button>

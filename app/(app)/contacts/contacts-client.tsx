@@ -8,6 +8,8 @@ import {
   Upload,
   Search,
   X,
+  Phone,
+  MessageSquare,
   MessageCircle,
   FileText,
   Pencil,
@@ -51,8 +53,11 @@ import type { Contact, Stage, Project } from '@/lib/types'
 import { ContactFormModal } from './contact-form-modal'
 import { ContactDetailDrawer } from './contact-detail-drawer'
 import { ContactLogModal } from './contact-log-modal'
+import { PhoneDisplay } from '@/components/phone-display'
+import { QuickLogSheet } from '@/components/quick-log-sheet'
 
 const PAGE_SIZE = 50
+const QUICK_LOG_KEY = 'crm-quick-log-pending'
 
 interface ContactsClientProps {
   stages: Stage[]
@@ -82,6 +87,10 @@ export function ContactsClient({ stages, projects }: ContactsClientProps) {
   const [drawerContact, setDrawerContact] = useState<Contact | null>(null)
   const [logContact, setLogContact] = useState<Contact | null>(null)
   const [logChannel, setLogChannel] = useState<'call' | 'zalo' | 'sms' | 'meeting' | 'email' | undefined>()
+  const [logDefaultNotes, setLogDefaultNotes] = useState<string | undefined>()
+  const [quickLogContact, setQuickLogContact] = useState<Contact | null>(null)
+  const [quickLogChannel, setQuickLogChannel] = useState<'call' | 'zalo' | 'sms' | undefined>()
+  const [quickLogOpen, setQuickLogOpen] = useState(false)
 
   const rawStage = stages.find((s) => s.is_raw)
   const badNumberStage = stages.find((s) => s.is_bad_number)
@@ -185,15 +194,53 @@ export function ContactsClient({ stages, projects }: ContactsClientProps) {
     setDeleteTarget(null)
   }
 
-  const handleZalo = (contact: Contact) => {
-    const url = `https://zalo.me/${phoneForUrl(contact.phone)}`
-    window.open(url, '_blank')
-    // After opening Zalo, open log modal with zalo pre-selected
-    setTimeout(() => {
-      setLogContact(contact)
-      setLogChannel('zalo')
-    }, 300)
+  const triggerContactAction = (contact: Contact, channel: 'call' | 'sms' | 'zalo') => {
+    sessionStorage.setItem(QUICK_LOG_KEY, JSON.stringify({
+      contactId: contact.id,
+      channel,
+      triggeredAt: Date.now(),
+    }))
+    const stripped = phoneForUrl(contact.phone)
+    if (channel === 'zalo') {
+      window.open(`https://zalo.me/${stripped}`, '_blank')
+    } else if (channel === 'call') {
+      window.location.href = `tel:${stripped}`
+    } else {
+      window.location.href = `sms:${stripped}`
+    }
   }
+
+  const handleZalo = (contact: Contact) => triggerContactAction(contact, 'zalo')
+  const handleCall = (contact: Contact) => triggerContactAction(contact, 'call')
+  const handleSms = (contact: Contact) => triggerContactAction(contact, 'sms')
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) return
+      const raw = sessionStorage.getItem(QUICK_LOG_KEY)
+      if (!raw) return
+      try {
+        const pending = JSON.parse(raw)
+        if (Date.now() - pending.triggeredAt > 30 * 60 * 1000) {
+          sessionStorage.removeItem(QUICK_LOG_KEY)
+          return
+        }
+        sessionStorage.removeItem(QUICK_LOG_KEY)
+        const contact = contacts.find((c) => c.id === pending.contactId)
+        if (!contact) return
+        if (window.innerWidth < 768) {
+          setQuickLogContact(contact)
+          setQuickLogChannel(pending.channel)
+          setQuickLogOpen(true)
+        } else {
+          setLogContact(contact)
+          setLogChannel(pending.channel)
+        }
+      } catch {}
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [contacts])
 
   const handleFormClose = (saved: boolean) => {
     setFormOpen(false)
@@ -204,6 +251,7 @@ export function ContactsClient({ stages, projects }: ContactsClientProps) {
   const handleLogClose = (saved: boolean) => {
     setLogContact(null)
     setLogChannel(undefined)
+    setLogDefaultNotes(undefined)
     if (saved) {
       fetchContacts()
       // Also refresh drawer if open
@@ -379,8 +427,8 @@ export function ContactsClient({ stages, projects }: ContactsClientProps) {
                             )}
                           </div>
                         </td>
-                        <td className="px-3 py-2 text-muted-foreground font-mono text-xs">
-                          {contact.phone}
+                        <td className="px-3 py-2 text-muted-foreground text-xs">
+                          <PhoneDisplay phone={contact.phone} />
                         </td>
                         <td className="px-3 py-2 text-muted-foreground hidden sm:table-cell">
                           {contact.project?.name ?? (
@@ -401,7 +449,27 @@ export function ContactsClient({ stages, projects }: ContactsClientProps) {
                             <Button
                               variant="ghost"
                               size="icon-sm"
-                              title="Zalo"
+                              title="Gọi điện"
+                              aria-label={`Gọi ${contact.name}`}
+                              onClick={() => handleCall(contact)}
+                              className="text-muted-foreground hover:text-foreground"
+                            >
+                              <Phone className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              title="Nhắn tin SMS"
+                              aria-label={`SMS ${contact.name}`}
+                              onClick={() => handleSms(contact)}
+                              className="text-muted-foreground hover:text-foreground"
+                            >
+                              <MessageSquare className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              title="Nhắn Zalo"
                               aria-label={`Zalo ${contact.name}`}
                               onClick={() => handleZalo(contact)}
                               className="text-muted-foreground hover:text-foreground"
@@ -499,6 +567,7 @@ export function ContactsClient({ stages, projects }: ContactsClientProps) {
           contact={logContact}
           stages={stages}
           defaultChannel={logChannel}
+          defaultNotes={logDefaultNotes}
           onClose={handleLogClose}
         />
       )}
@@ -519,7 +588,31 @@ export function ContactsClient({ stages, projects }: ContactsClientProps) {
             setLogChannel(undefined)
           }}
           onZalo={handleZalo}
+          onCall={handleCall}
+          onSms={handleSms}
           onRefresh={fetchContacts}
+        />
+      )}
+
+      {quickLogContact && quickLogChannel && (
+        <QuickLogSheet
+          open={quickLogOpen}
+          contact={quickLogContact}
+          channel={quickLogChannel}
+          onClose={(saved) => {
+            setQuickLogOpen(false)
+            setQuickLogContact(null)
+            setQuickLogChannel(undefined)
+            if (saved) fetchContacts()
+          }}
+          onOpenFullLog={(c, ch, notes) => {
+            setQuickLogOpen(false)
+            setQuickLogContact(null)
+            setQuickLogChannel(undefined)
+            setLogContact(c)
+            setLogChannel(ch)
+            setLogDefaultNotes(notes)
+          }}
         />
       )}
 

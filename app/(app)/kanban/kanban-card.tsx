@@ -3,6 +3,7 @@
 import { formatDistanceToNow } from 'date-fns'
 import { vi } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
+import { PhoneDisplay } from '@/components/phone-display'
 import type { Contact, Stage, Project } from '@/lib/types'
 
 interface KanbanCardProps {
@@ -36,7 +37,9 @@ export function KanbanCard({
       <p className="font-semibold truncate leading-tight">{contact.name}</p>
 
       {/* Line 2: phone */}
-      <p className="text-muted-foreground mt-1 font-mono text-xs">{contact.phone}</p>
+      <p className="text-muted-foreground mt-1 text-xs">
+        <PhoneDisplay phone={contact.phone} />
+      </p>
 
       {/* Line 3: project badge */}
       {contact.project && (

@@ -36,6 +36,7 @@ import { ContactDetailDrawer } from '@/app/(app)/contacts/contact-detail-drawer'
 import { ContactLogModal } from '@/app/(app)/contacts/contact-log-modal'
 import { ContactFormModal } from '@/app/(app)/contacts/contact-form-modal'
 import { deleteContact } from '@/app/actions/contacts'
+import { PhoneDisplay } from '@/components/phone-display'
 import type { ContactLog, Stage, Project, Contact, LogChannel } from '@/lib/types'
 import { OUTCOME_LABELS } from '@/lib/types'
 
@@ -111,7 +112,7 @@ function LogCard({
               >
                 {log.contacts.name}
               </button>
-              <span className="text-xs text-muted-foreground">{log.contacts.phone}</span>
+              <span className="text-xs text-muted-foreground"><PhoneDisplay phone={log.contacts.phone} /></span>
             </div>
 
             <div className="flex items-center gap-1.5 mt-1 flex-wrap">
