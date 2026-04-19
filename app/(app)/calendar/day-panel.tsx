@@ -282,7 +282,7 @@ export function DayPanel({
   const titleCapitalized = title.charAt(0).toUpperCase() + title.slice(1)
 
   return (
-    <div className="border border-border rounded-lg flex flex-col h-full min-h-[400px] md:min-h-0">
+    <div className="border border-border rounded-lg flex flex-col h-full min-h-[200px] md:min-h-[400px] lg:min-h-0">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
         <h2 className="text-sm font-semibold leading-tight">{titleCapitalized}</h2>
