@@ -268,7 +268,7 @@ export function ProjectsClient({ initialProjects }: { initialProjects: Project[]
                       ⚠️ Có {getContactCount(deleteTarget)} liên hệ đang thuộc dự án này.
                       Chọn cách xử lý:
                     </p>
-                    <Select value={mergeInto} onValueChange={(v) => setMergeInto(v ?? 'none')}>
+                    <Select value={mergeInto} onValueChange={(v) => setMergeInto(v ?? 'none')} items={[{value: 'none', label: 'Để trống (xoá liên kết dự án)'}, ...otherProjects.map(p => ({value: p.id, label: `Gộp vào: ${p.name}`}))]}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>

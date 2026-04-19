@@ -155,7 +155,7 @@ export function MarkDoneModal({ log, stages, onClose }: MarkDoneModalProps) {
                 name="outcome"
                 control={control}
                 render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value} items={OUTCOME_LABELS}>
                     <SelectTrigger>
                       <SelectValue placeholder="Chọn kết quả…" />
                     </SelectTrigger>

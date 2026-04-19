@@ -284,6 +284,7 @@ export function ContactFormModal({ open, contact, projects: initialProjects, onC
             ) : (
               <Select
                 value={watch('project_id') ?? ''}
+                items={[{value: '', label: 'Không có'}, ...projects.map(p => ({value: p.id, label: p.name})), {value: '__new__', label: 'Thêm dự án mới'}]}
                 onValueChange={(val) => {
                   if (val === '__new__') {
                     setNewProjectMode(true)

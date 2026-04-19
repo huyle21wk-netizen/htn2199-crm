@@ -268,7 +268,7 @@ export function BadNumbersClient({ initialBadStageId, projects }: BadNumbersClie
           value={searchPhone}
           onChange={(e) => setSearchPhone(e.target.value)}
         />
-        <Select value={filterProject} onValueChange={(v) => setFilterProject(v ?? 'all')}>
+        <Select value={filterProject} onValueChange={(v) => setFilterProject(v ?? 'all')} items={[{value: 'all', label: 'Tất cả dự án'}, {value: 'none', label: 'Không có dự án'}, ...projects.map(p => ({value: p.id, label: p.name}))]}>
           <SelectTrigger className="h-8 w-44 text-sm">
             <SelectValue placeholder="Tất cả dự án" />
           </SelectTrigger>

@@ -186,7 +186,7 @@ export function KanbanClient({
               className="pl-8 h-9 text-sm"
             />
           </div>
-          <Select value={filterProject} onValueChange={(val) => setFilterProject(val ?? 'all')}>
+          <Select value={filterProject} onValueChange={(val) => setFilterProject(val ?? 'all')} items={[{value: 'all', label: 'Tất cả dự án'}, ...projects.map(p => ({value: p.id, label: p.name}))]}>
             <SelectTrigger className="w-44 h-9 text-sm">
               <SelectValue placeholder="Tất cả dự án" />
             </SelectTrigger>
@@ -456,6 +456,7 @@ function MobileContactCard({
         <Select
           value={contact.stage_id}
           onValueChange={(val) => val && onStageChange(val)}
+          items={stages.map(s => ({value: s.id, label: s.name}))}
         >
           <SelectTrigger className="h-7 text-xs flex-1">
             <SelectValue />

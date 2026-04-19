@@ -204,7 +204,7 @@ export function ContactLogModal({
                 name="channel"
                 control={control}
                 render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select value={field.value} onValueChange={field.onChange} items={CHANNEL_LABELS}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -250,7 +250,7 @@ export function ContactLogModal({
                   name="outcome"
                   control={control}
                   render={({ field }) => (
-                    <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                    <Select value={field.value ?? ''} onValueChange={field.onChange} items={OUTCOME_LABELS}>
                       <SelectTrigger aria-invalid={status === 'done' && !outcome}>
                         <SelectValue placeholder="Chọn kết quả..." />
                       </SelectTrigger>

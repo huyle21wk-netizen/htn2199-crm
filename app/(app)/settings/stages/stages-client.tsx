@@ -247,7 +247,7 @@ export function StagesClient({ initialStages, contactCountMap }: StagesClientPro
 
           {deleteContactCount > 0 && (
             <div className="py-2">
-              <Select value={migrateTo} onValueChange={(val) => setMigrateTo(val ?? '')}>
+              <Select value={migrateTo} onValueChange={(val) => setMigrateTo(val ?? '')} items={migrateOptions.map(s => ({value: s.id, label: s.name}))}>
                 <SelectTrigger>
                   <SelectValue placeholder="Chọn giai đoạn thay thế..." />
                 </SelectTrigger>
