@@ -269,3 +269,145 @@ export async function revertContactStage(contactId: string, stageId: string) {
   revalidatePath('/contacts')
   return { success: true }
 }
+
+export interface MarkLogAsDoneInput {
+  logId: string
+  contact_id: string
+  outcome: LogOutcome
+  notes?: string | null
+  scheduled_for?: string | null
+  followUp?: {
+    scheduled_for: string
+    notes?: string | null
+  } | null
+}
+
+export async function markLogAsDone(input: MarkLogAsDoneInput): Promise<CreateLogResult> {
+  const supabase = await createClient()
+
+  const scheduledFor = input.scheduled_for || new Date().toISOString()
+
+  const { error: updateError } = await supabase
+    .from('contact_logs')
+    .update({
+      status: 'done',
+      outcome: input.outcome,
+      notes: input.notes ?? null,
+      scheduled_for: scheduledFor,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', input.logId)
+
+  if (updateError) return { error: updateError.message }
+
+  if (input.followUp) {
+    const { error: fuError } = await supabase.from('contact_logs').insert({
+      contact_id: input.contact_id,
+      scheduled_for: input.followUp.scheduled_for,
+      channel: 'call',
+      status: 'planned',
+      outcome: null,
+      notes: input.followUp.notes ?? null,
+    })
+    if (fuError) return { error: fuError.message }
+  }
+
+  const { data: contact } = await supabase
+    .from('contacts')
+    .select('id, stage_id, stages(*)')
+    .eq('id', input.contact_id)
+    .single()
+
+  if (!contact) return { error: 'Không tìm thấy liên hệ.' }
+
+  const currentStage = contact.stages as unknown as {
+    id: string; name: string; is_raw: boolean; is_bad_number: boolean
+    is_terminal: boolean; is_system: boolean
+  }
+
+  const moveContact = async (targetStageId: string) => {
+    await supabase.from('contacts').update({ stage_id: targetStageId }).eq('id', input.contact_id)
+  }
+
+  const result: CreateLogResult = {}
+
+  switch (input.outcome) {
+    case 'interested':
+    case 'follow_up': {
+      if (currentStage.is_raw) {
+        const { data: qtStage } = await supabase.from('stages').select('id, name').eq('name', 'Quan tâm').single()
+        if (qtStage) {
+          await moveContact(qtStage.id)
+          result.stageChanged = { from: currentStage.id, fromName: currentStage.name, to: qtStage.id, toName: qtStage.name }
+        }
+      }
+      break
+    }
+    case 'not_interested': {
+      if (!currentStage.is_bad_number) {
+        const { data: prevLogs } = await supabase
+          .from('contact_logs')
+          .select('outcome, created_at')
+          .eq('contact_id', input.contact_id)
+          .eq('status', 'done')
+          .order('created_at', { ascending: false })
+          .limit(2)
+        const prevOutcome = prevLogs && prevLogs.length >= 2 ? prevLogs[1].outcome : null
+        if (prevOutcome === 'not_interested' && !currentStage.is_terminal) {
+          const { data: huyStage } = await supabase.from('stages').select('id, name').eq('name', 'Huỷ').single()
+          if (huyStage) {
+            await moveContact(huyStage.id)
+            result.stageChanged = { from: currentStage.id, fromName: currentStage.name, to: huyStage.id, toName: huyStage.name }
+            result.showUndoCancel = true
+          }
+        }
+      }
+      break
+    }
+    case 'bad_number': {
+      const { data: soRacStage } = await supabase.from('stages').select('id, name').eq('is_bad_number', true).single()
+      if (soRacStage) {
+        await moveContact(soRacStage.id)
+        result.stageChanged = { from: currentStage.id, fromName: currentStage.name, to: soRacStage.id, toName: soRacStage.name }
+      }
+      break
+    }
+    case 'deposited': {
+      if (!currentStage.is_terminal) {
+        const { data: cotCocStage } = await supabase.from('stages').select('id, name').eq('name', 'Chốt cọc').single()
+        if (cotCocStage) {
+          await moveContact(cotCocStage.id)
+          result.stageChanged = { from: currentStage.id, fromName: currentStage.name, to: cotCocStage.id, toName: cotCocStage.name }
+        }
+      }
+      break
+    }
+    case 'closed': {
+      if (!currentStage.is_terminal) {
+        const { data: thanhCongStage } = await supabase.from('stages').select('id, name').eq('name', 'Thành công').single()
+        if (thanhCongStage) {
+          await moveContact(thanhCongStage.id)
+          result.stageChanged = { from: currentStage.id, fromName: currentStage.name, to: thanhCongStage.id, toName: thanhCongStage.name }
+        }
+      }
+      break
+    }
+    case 'no_answer': {
+      const { data: recentLogs } = await supabase
+        .from('contact_logs')
+        .select('outcome')
+        .eq('contact_id', input.contact_id)
+        .eq('status', 'done')
+        .order('created_at', { ascending: false })
+        .limit(3)
+      if (recentLogs && recentLogs.length >= 3 && recentLogs.every((l) => l.outcome === 'no_answer')) {
+        result.showNoAnswerDialog = true
+      }
+      break
+    }
+  }
+
+  revalidatePath('/calendar')
+  revalidatePath('/contacts')
+  return result
+}
