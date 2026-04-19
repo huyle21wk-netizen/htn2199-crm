@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "sonner";
+import { OfflineBanner } from "@/components/offline-banner";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
           storageKey="crm-theme"
           disableTransitionOnChange
         >
+          <OfflineBanner />
           <TooltipProvider>
             {children}
           </TooltipProvider>
