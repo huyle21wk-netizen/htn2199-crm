@@ -564,7 +564,7 @@ export function ReportClient({ stages, projects }: Props) {
       </div>
 
       {/* ── Block 1: Overview ── */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:grid-cols-4">
         <MetricCard
           label="Tổng liên hệ đã thực hiện"
           value={overview.totalLogs}

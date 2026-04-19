@@ -142,7 +142,7 @@ export function Sidebar() {
       <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center h-14 px-4 border-b border-border bg-card">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger
-            className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary"
+            className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary"
             aria-label="Mở menu"
           >
             <Menu className="h-5 w-5" />
