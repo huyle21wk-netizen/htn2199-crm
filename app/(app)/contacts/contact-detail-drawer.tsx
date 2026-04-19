@@ -25,8 +25,19 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { createClient } from '@/lib/supabase/client'
 import { phoneForUrl } from '@/lib/phone'
+import { deleteLog } from '@/app/actions/logs'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { Contact, ContactLog, Stage, Project } from '@/lib/types'
 import { CHANNEL_LABELS, OUTCOME_LABELS } from '@/lib/types'
@@ -236,11 +247,15 @@ export function ContactDetailDrawer({
 function LogItem({
   log,
   onMarkDone,
+  onRefresh,
 }: {
   log: ContactLog
   onMarkDone: () => void
   onRefresh: () => void
 }) {
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
   const isPlanned = log.status === 'planned'
   const isOverdue = isPlanned && new Date(log.scheduled_for) < new Date()
 
@@ -256,55 +271,100 @@ function LogItem({
     }
   }
 
+  const handleDelete = async () => {
+    setDeleting(true)
+    const result = await deleteLog(log.id)
+    setDeleting(false)
+    if (result.error) {
+      toast.error('Không thể xoá log. Vui lòng thử lại.')
+    } else {
+      toast.success('Đã xoá log.')
+      onRefresh()
+    }
+    setConfirmDelete(false)
+  }
+
   return (
-    <div className="flex gap-3 text-sm">
-      <div className="mt-0.5 shrink-0">
-        {isOverdue ? (
-          <AlertCircle className="h-4 w-4 text-destructive" />
-        ) : isPlanned ? (
-          <Clock className="h-4 w-4 text-primary" />
-        ) : (
-          <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-        )}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-muted-foreground text-xs">
-            {format(new Date(log.scheduled_for), 'dd/MM/yyyy HH:mm', { locale: vi })}
-          </span>
-          <span className="text-xs text-muted-foreground">
-            {CHANNEL_LABELS[log.channel]}
-          </span>
-          {log.outcome && (
-            <span className={`text-xs font-medium ${outcomeColor(log.outcome)}`}>
-              {OUTCOME_LABELS[log.outcome]}
-            </span>
-          )}
-          {isPlanned && (
-            <Badge variant="outline" className="text-xs h-4 px-1.5 text-primary border-primary/30">
-              Đã lên lịch
-            </Badge>
-          )}
-          {isOverdue && (
-            <Badge variant="outline" className="text-xs h-4 px-1.5 text-destructive border-destructive/30">
-              Quá hạn
-            </Badge>
+    <>
+      <div className="flex gap-3 text-sm group">
+        <div className="mt-0.5 shrink-0">
+          {isOverdue ? (
+            <AlertCircle className="h-4 w-4 text-destructive" />
+          ) : isPlanned ? (
+            <Clock className="h-4 w-4 text-primary" />
+          ) : (
+            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
           )}
         </div>
-        {log.notes && (
-          <p className="text-xs text-muted-foreground mt-0.5 break-words">{log.notes}</p>
-        )}
-        {isPlanned && (
-          <Button
-            size="sm"
-            variant="outline"
-            className="mt-1.5 h-6 text-xs"
-            onClick={onMarkDone}
-          >
-            Đánh dấu hoàn thành
-          </Button>
-        )}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-muted-foreground text-xs">
+              {format(new Date(log.scheduled_for), 'dd/MM/yyyy HH:mm', { locale: vi })}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {CHANNEL_LABELS[log.channel]}
+            </span>
+            {log.outcome && (
+              <span className={`text-xs font-medium ${outcomeColor(log.outcome)}`}>
+                {OUTCOME_LABELS[log.outcome]}
+              </span>
+            )}
+            {isPlanned && (
+              <Badge variant="outline" className="text-xs h-4 px-1.5 text-primary border-primary/30">
+                Đã lên lịch
+              </Badge>
+            )}
+            {isOverdue && (
+              <Badge variant="outline" className="text-xs h-4 px-1.5 text-destructive border-destructive/30">
+                Quá hạn
+              </Badge>
+            )}
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Xoá log"
+              className="ml-auto h-5 w-5 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
+              onClick={() => setConfirmDelete(true)}
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
+          {log.notes && (
+            <p className="text-xs text-muted-foreground mt-0.5 break-words">{log.notes}</p>
+          )}
+          {isPlanned && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="mt-1.5 h-6 text-xs"
+              onClick={onMarkDone}
+            >
+              Đánh dấu hoàn thành
+            </Button>
+          )}
+        </div>
       </div>
-    </div>
+
+      <AlertDialog open={confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xoá log này?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Hành động này không thể hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Huỷ</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-white hover:bg-destructive/90"
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? 'Đang xoá...' : 'Xoá'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

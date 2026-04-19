@@ -411,3 +411,12 @@ export async function markLogAsDone(input: MarkLogAsDoneInput): Promise<CreateLo
   revalidatePath('/contacts')
   return result
 }
+
+export async function deleteLog(logId: string): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { error } = await supabase.from('contact_logs').delete().eq('id', logId)
+  if (error) return { error: error.message }
+  revalidatePath('/calendar')
+  revalidatePath('/contacts')
+  return {}
+}
