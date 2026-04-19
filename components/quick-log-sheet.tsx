@@ -26,7 +26,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { PhoneDisplay } from '@/components/phone-display'
 import { createLog, moveContactToSoRac, revertContactStage } from '@/app/actions/logs'
 import { phoneForUrl } from '@/lib/phone'
+import { createClient } from '@/lib/supabase/client'
 import type { Contact, LogChannel, LogOutcome } from '@/lib/types'
+import { OUTCOME_LABELS } from '@/lib/types'
 
 interface QuickLogSheetProps {
   open: boolean
@@ -49,7 +51,14 @@ function formatFollowUpDate(days: number) {
   return format(addDays(new Date(), days), 'EEEE, dd/MM', { locale: vi })
 }
 
+interface LastLog {
+  date: string
+  outcomeLabel: string
+  notes: string | null
+}
+
 export function QuickLogSheet({ open, contact, channel, onClose, onOpenFullLog }: QuickLogSheetProps) {
+  const supabase = createClient()
   const [selectedOutcome, setSelectedOutcome] = useState<QuickOutcome | null>(null)
   const [notes, setNotes] = useState('')
   const [reason, setReason] = useState('')
@@ -57,6 +66,8 @@ export function QuickLogSheet({ open, contact, channel, onClose, onOpenFullLog }
   const [followUpConfirmed, setFollowUpConfirmed] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [noAnswerDialog, setNoAnswerDialog] = useState(false)
+  const [lastLog, setLastLog] = useState<LastLog | null>(null)
+  const [notesExpanded, setNotesExpanded] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -67,8 +78,28 @@ export function QuickLogSheet({ open, contact, channel, onClose, onOpenFullLog }
       setReason('')
       setFollowUpDays(2)
       setFollowUpConfirmed(false)
+      setNotesExpanded(false)
+      fetchLastLog()
     }
-  }, [open])
+  }, [open, contact.id])
+
+  const fetchLastLog = async () => {
+    const { data } = await supabase
+      .from('contact_logs')
+      .select('scheduled_for, outcome, notes')
+      .eq('contact_id', contact.id)
+      .eq('status', 'done')
+      .order('scheduled_for', { ascending: false })
+      .limit(1)
+      .single()
+
+    if (!data || !data.outcome) { setLastLog(null); return }
+    setLastLog({
+      date: format(new Date(data.scheduled_for), 'dd/MM', { locale: vi }),
+      outcomeLabel: OUTCOME_LABELS[data.outcome as LogOutcome] ?? data.outcome,
+      notes: data.notes,
+    })
+  }
 
   useEffect(() => {
     if (open && selectedOutcome === null) {
@@ -188,6 +219,37 @@ export function QuickLogSheet({ open, contact, channel, onClose, onOpenFullLog }
               </Button>
             </div>
           </SheetHeader>
+
+          {lastLog && (
+            <div className="px-4 py-2 border-b border-border bg-muted/30">
+              <p className="text-sm text-muted-foreground leading-snug">
+                <span className="font-medium">💬 Lần trước ({lastLog.date}):</span>
+                {' '}{lastLog.outcomeLabel}
+                {lastLog.notes && (
+                  <>
+                    {' · '}
+                    {notesExpanded || lastLog.notes.length <= 60 ? (
+                      <button
+                        type="button"
+                        onClick={() => setNotesExpanded(false)}
+                        className="text-left"
+                      >
+                        {lastLog.notes}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setNotesExpanded(true)}
+                        className="text-left"
+                      >
+                        {lastLog.notes.slice(0, 60)}…
+                      </button>
+                    )}
+                  </>
+                )}
+              </p>
+            </div>
+          )}
 
           <div className="px-4 py-4 space-y-4">
             {/* Outcome buttons */}
