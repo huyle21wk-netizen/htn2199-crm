@@ -10,23 +10,36 @@ import {
   Settings,
   LogOut,
   Menu,
-  X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { createClient } from "@/lib/supabase/client";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-const navItems = [
-  { href: "/contacts", label: "Liên hệ", icon: Users },
-  { href: "/kanban", label: "Kanban", icon: Kanban },
-  { href: "/calendar", label: "Lịch", icon: CalendarDays, badge: 0 },
-  { href: "/report", label: "Báo cáo", icon: BarChart3 },
-];
-
 function NavContent({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [overdueCount, setOverdueCount] = useState(0);
+
+  useEffect(() => {
+    const fetchOverdue = async () => {
+      const supabase = createClient();
+      const { count } = await supabase
+        .from('contact_logs')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'planned')
+        .lt('scheduled_for', new Date().toISOString());
+      setOverdueCount(count ?? 0);
+    };
+    fetchOverdue();
+  }, [pathname]);
+
+  const navItems = [
+    { href: "/contacts", label: "Liên hệ", icon: Users },
+    { href: "/kanban", label: "Kanban", icon: Kanban },
+    { href: "/calendar", label: "Lịch", icon: CalendarDays, badge: overdueCount },
+    { href: "/report", label: "Báo cáo", icon: BarChart3 },
+  ];
 
   const handleLogout = async () => {
     const supabase = createClient();
