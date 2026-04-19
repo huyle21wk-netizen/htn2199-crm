@@ -1,8 +1,18 @@
-export default function ReportPage() {
+import { createClient } from '@/lib/supabase/server'
+import { ReportClient } from './report-client'
+
+export default async function ReportPage() {
+  const supabase = await createClient()
+
+  const [{ data: stages }, { data: projects }] = await Promise.all([
+    supabase.from('stages').select('*').order('position'),
+    supabase.from('projects').select('*').order('name'),
+  ])
+
   return (
-    <div className="space-y-2">
-      <h1 className="text-2xl font-semibold">Báo cáo</h1>
-      <p className="text-muted-foreground">Sắp có — báo cáo và thống kê sẽ hiển thị ở đây.</p>
-    </div>
-  );
+    <ReportClient
+      stages={stages ?? []}
+      projects={projects ?? []}
+    />
+  )
 }
