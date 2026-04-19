@@ -59,6 +59,7 @@ interface ContactLogModalProps {
   stages: Stage[]
   defaultChannel?: LogChannel
   defaultScheduledFor?: string
+  defaultNotes?: string
   onClose: (saved: boolean) => void
 }
 
@@ -66,6 +67,7 @@ export function ContactLogModal({
   contact,
   defaultChannel,
   defaultScheduledFor,
+  defaultNotes,
   onClose,
 }: ContactLogModalProps) {
   const [submitting, setSubmitting] = useState(false)
@@ -86,7 +88,7 @@ export function ContactLogModal({
       channel: defaultChannel ?? 'call',
       status: 'done',
       outcome: '',
-      notes: '',
+      notes: defaultNotes ?? '',
       hasFollowUp: false,
       followUp_date: toDatetimeLocal(addDays(new Date(), 3)),
       followUp_notes: '',
