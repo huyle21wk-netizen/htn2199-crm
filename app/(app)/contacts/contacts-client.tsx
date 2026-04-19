@@ -402,6 +402,7 @@ export function ContactsClient({ stages, projects }: ContactsClientProps) {
                               variant="ghost"
                               size="icon-sm"
                               title="Zalo"
+                              aria-label={`Zalo ${contact.name}`}
                               onClick={() => handleZalo(contact)}
                               className="text-muted-foreground hover:text-foreground"
                             >
@@ -411,6 +412,7 @@ export function ContactsClient({ stages, projects }: ContactsClientProps) {
                               variant="ghost"
                               size="icon-sm"
                               title="Tạo log"
+                              aria-label={`Tạo log cho ${contact.name}`}
                               onClick={() => {
                                 setLogContact(contact)
                                 setLogChannel(undefined)
@@ -423,6 +425,7 @@ export function ContactsClient({ stages, projects }: ContactsClientProps) {
                               variant="ghost"
                               size="icon-sm"
                               title="Sửa"
+                              aria-label={`Sửa ${contact.name}`}
                               onClick={() => {
                                 setEditContact(contact)
                                 setFormOpen(true)
@@ -435,6 +438,7 @@ export function ContactsClient({ stages, projects }: ContactsClientProps) {
                               variant="ghost"
                               size="icon-sm"
                               title="Xoá"
+                              aria-label={`Xoá ${contact.name}`}
                               onClick={() => setDeleteTarget(contact)}
                               className="text-muted-foreground hover:text-destructive"
                             >

@@ -120,6 +120,7 @@ export function ContactDetailDrawer({
                 size="icon-sm"
                 onClick={() => onZalo(contact)}
                 title="Zalo"
+                aria-label="Mở Zalo"
               >
                 <MessageCircle className="h-4 w-4" />
               </Button>
@@ -128,6 +129,7 @@ export function ContactDetailDrawer({
                 size="icon-sm"
                 onClick={() => onEdit(contact)}
                 title="Sửa"
+                aria-label="Sửa liên hệ"
               >
                 <Pencil className="h-4 w-4" />
               </Button>
@@ -137,6 +139,7 @@ export function ContactDetailDrawer({
                 onClick={() => onDelete(contact)}
                 className="hover:text-destructive"
                 title="Xoá"
+                aria-label="Xoá liên hệ"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -144,6 +147,7 @@ export function ContactDetailDrawer({
                 variant="ghost"
                 size="icon-sm"
                 onClick={onClose}
+                aria-label="Đóng"
               >
                 <X className="h-4 w-4" />
               </Button>
