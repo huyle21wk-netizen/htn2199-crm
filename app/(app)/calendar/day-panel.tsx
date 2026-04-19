@@ -15,6 +15,7 @@ import {
   ChevronDown,
   ChevronUp,
   Plus,
+  CalendarDays,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -218,11 +219,17 @@ export function DayPanel({
       <ScrollArea className="flex-1 p-3">
         {logs.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-10 gap-3 text-center">
-            <p className="text-sm text-muted-foreground">
-              {overdueMode
-                ? 'Không có follow-up quá hạn.'
-                : 'Chưa có log nào trong ngày này.'}
-            </p>
+            <div className="p-3 rounded-full bg-secondary">
+              <CalendarDays className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-foreground">
+                {overdueMode ? 'Không có follow-up quá hạn' : 'Chưa có log nào trong ngày này'}
+              </h3>
+              {!overdueMode && (
+                <p className="text-xs text-muted-foreground mt-0.5">Tạo log để ghi nhận liên hệ</p>
+              )}
+            </div>
             {!overdueMode && selectedDay && (
               <Button size="sm" variant="outline" onClick={onCreateLog} className="gap-1">
                 <Plus className="h-3.5 w-3.5" />

@@ -14,7 +14,7 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core'
 import { toast } from 'sonner'
-import { Search } from 'lucide-react'
+import { Kanban, Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -202,8 +202,23 @@ export function KanbanClient({
         </div>
       </div>
 
+      {/* Empty state when no CRM contacts at all */}
+      {contacts.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
+          <div className="p-4 rounded-full bg-secondary">
+            <Kanban className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground">Chưa có khách hàng trong CRM</h3>
+            <p className="text-sm text-muted-foreground mt-1 max-w-xs">
+              Liên hệ cần được tạo log với kết quả &quot;Có quan tâm&quot; để xuất hiện ở đây
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Desktop Board */}
-      <div className="hidden md:block -mx-6 px-6 overflow-x-auto pb-4">
+      {contacts.length > 0 && <div className="hidden md:block -mx-6 px-6 overflow-x-auto pb-4">
         <DndContext
           sensors={sensors}
           onDragStart={handleDragStart}
@@ -249,10 +264,10 @@ export function KanbanClient({
             )}
           </DragOverlay>
         </DndContext>
-      </div>
+      </div>}
 
       {/* Mobile View */}
-      <div className="md:hidden">
+      {contacts.length > 0 && <div className="md:hidden">
         {/* Stage tabs */}
         <div className="overflow-x-auto -mx-4 px-4">
           <div className="flex gap-2 w-max pb-3">
@@ -298,7 +313,7 @@ export function KanbanClient({
             ))
           )}
         </div>
-      </div>
+      </div>}
 
       {/* Contact detail drawer */}
       {drawerContact && (

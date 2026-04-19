@@ -308,7 +308,12 @@ export function ContactsClient({ stages, projects }: ContactsClientProps) {
           Đang tải...
         </div>
       ) : contacts.length === 0 ? (
-        <EmptyState onAdd={() => setFormOpen(true)} onImport={() => router.push('/contacts/import')} />
+        <EmptyState
+          hasFilters={!!hasFilters}
+          onAdd={() => setFormOpen(true)}
+          onImport={() => router.push('/contacts/import')}
+          onClearFilters={clearFilters}
+        />
       ) : (
         <>
           <div className="border border-border rounded-lg overflow-hidden">
@@ -514,19 +519,43 @@ export function ContactsClient({ stages, projects }: ContactsClientProps) {
 }
 
 function EmptyState({
+  hasFilters,
   onAdd,
   onImport,
+  onClearFilters,
 }: {
+  hasFilters: boolean
   onAdd: () => void
   onImport: () => void
+  onClearFilters: () => void
 }) {
+  if (hasFilters) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
+        <div className="p-4 rounded-full bg-secondary">
+          <Search className="h-8 w-8 text-muted-foreground" />
+        </div>
+        <div>
+          <h3 className="font-semibold text-foreground">Không tìm thấy liên hệ phù hợp</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Thử thay đổi từ khoá hoặc bộ lọc
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={onClearFilters}>
+          <X className="h-4 w-4" />
+          Xoá bộ lọc
+        </Button>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center gap-4">
       <div className="p-4 rounded-full bg-accent">
         <Users className="h-8 w-8 text-primary" />
       </div>
       <div>
-        <p className="font-medium text-foreground">Chưa có liên hệ nào</p>
+        <h3 className="font-semibold text-foreground">Chưa có liên hệ nào</h3>
         <p className="text-sm text-muted-foreground mt-1">
           Thêm thủ công hoặc import từ file CSV/Excel
         </p>

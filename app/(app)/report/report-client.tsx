@@ -24,7 +24,7 @@ import { Separator } from '@/components/ui/separator'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import {
-  CalendarIcon, Download, Phone, Users, TrendingUp, Trophy,
+  CalendarIcon, Download, Phone, Users, TrendingUp, Trophy, BarChart3,
 } from 'lucide-react'
 import type { DateRange } from 'react-day-picker'
 import { cn } from '@/lib/utils'
@@ -159,8 +159,14 @@ function downloadCsv(rows: Record<string, string>[], filename: string) {
 
 function EmptyState() {
   return (
-    <div className="flex items-center justify-center py-10 text-sm text-muted-foreground">
-      Chưa có dữ liệu trong khoảng thời gian này
+    <div className="flex flex-col items-center justify-center py-10 gap-3 text-center">
+      <div className="p-3 rounded-full bg-secondary">
+        <BarChart3 className="h-6 w-6 text-muted-foreground" />
+      </div>
+      <div>
+        <h3 className="text-sm font-medium text-foreground">Chưa có dữ liệu</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">Thay đổi khoảng thời gian để xem dữ liệu khác</p>
+      </div>
     </div>
   )
 }

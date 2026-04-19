@@ -189,7 +189,19 @@ export function ContactDetailDrawer({
               {loading ? (
                 <p className="text-sm text-muted-foreground">Đang tải...</p>
               ) : logs.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Chưa có lịch sử liên hệ.</p>
+                <div className="flex flex-col items-center justify-center py-8 gap-3 text-center">
+                  <div className="p-3 rounded-full bg-secondary">
+                    <FileText className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-foreground">Chưa có lịch sử liên hệ</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">Ghi lại cuộc gọi hoặc tin nhắn đầu tiên</p>
+                  </div>
+                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => onNewLog(contact)}>
+                    <FileText className="h-3.5 w-3.5" />
+                    Tạo log đầu tiên
+                  </Button>
+                </div>
               ) : (
                 <div className="space-y-2">
                   {logs.map((log) => (
