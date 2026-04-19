@@ -364,7 +364,7 @@ function LogItem({
               variant="ghost"
               size="icon-sm"
               aria-label="Xoá log"
-              className="ml-auto h-5 w-5 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
+              className="ml-auto h-5 w-5 opacity-100 md:opacity-0 md:group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
               onClick={() => setConfirmDelete(true)}
             >
               <Trash2 className="h-3 w-3" />
