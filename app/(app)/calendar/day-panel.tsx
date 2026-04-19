@@ -17,11 +17,25 @@ import {
   Plus,
   CalendarDays,
 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { ContactDetailDrawer } from '@/app/(app)/contacts/contact-detail-drawer'
+import { ContactLogModal } from '@/app/(app)/contacts/contact-log-modal'
+import { ContactFormModal } from '@/app/(app)/contacts/contact-form-modal'
+import { deleteContact } from '@/app/actions/contacts'
 import type { ContactLog, Stage, Project, Contact, LogChannel } from '@/lib/types'
 import { OUTCOME_LABELS } from '@/lib/types'
 
@@ -68,6 +82,10 @@ function LogCard({
 }) {
   const [expanded, setExpanded] = useState(false)
   const [showDrawer, setShowDrawer] = useState(false)
+  const [logContact, setLogContact] = useState<Contact | null>(null)
+  const [editContact, setEditContact] = useState<Contact | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Contact | null>(null)
+  const [deleting, setDeleting] = useState(false)
   const status = getLogStatus(log)
   const Icon = CHANNEL_ICONS[log.channel] ?? Phone
   const timeStr = format(new Date(log.scheduled_for), 'HH:mm')
@@ -163,13 +181,70 @@ function LogCard({
           stages={stages}
           projects={projects}
           onClose={() => setShowDrawer(false)}
-          onEdit={() => setShowDrawer(false)}
-          onDelete={() => setShowDrawer(false)}
-          onNewLog={() => setShowDrawer(false)}
-          onZalo={() => {}}
+          onEdit={(c) => { setShowDrawer(false); setEditContact(c) }}
+          onDelete={(c) => { setShowDrawer(false); setDeleteTarget(c) }}
+          onNewLog={(c) => { setShowDrawer(false); setLogContact(c) }}
+          onZalo={() => {
+            const url = `https://zalo.me/${log.contacts.phone.replace(/\s/g, '')}`
+            window.open(url, '_blank')
+          }}
           onRefresh={onRefresh}
         />
       )}
+
+      {logContact && (
+        <ContactLogModal
+          contact={logContact}
+          stages={stages}
+          onClose={(saved) => {
+            setLogContact(null)
+            if (saved) onRefresh()
+          }}
+        />
+      )}
+
+      <ContactFormModal
+        open={!!editContact}
+        contact={editContact}
+        projects={projects}
+        onClose={(saved) => {
+          setEditContact(null)
+          if (saved) onRefresh()
+        }}
+      />
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xoá liên hệ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Xoá <strong>{deleteTarget?.name}</strong>? Hành động này không thể hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Huỷ</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-white hover:bg-destructive/90"
+              disabled={deleting}
+              onClick={async () => {
+                if (!deleteTarget) return
+                setDeleting(true)
+                const result = await deleteContact(deleteTarget.id)
+                setDeleting(false)
+                if (result.error) {
+                  toast.error('Không thể xoá. Vui lòng thử lại.')
+                } else {
+                  toast.success('Đã xoá liên hệ.')
+                  setDeleteTarget(null)
+                  onRefresh()
+                }
+              }}
+            >
+              {deleting ? 'Đang xoá...' : 'Xoá'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

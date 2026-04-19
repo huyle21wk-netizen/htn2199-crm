@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   DndContext,
   DragOverlay,
@@ -24,9 +25,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { updateContactStage } from '@/app/actions/contacts'
+import { updateContactStage, deleteContact } from '@/app/actions/contacts'
 import { ContactDetailDrawer } from '../contacts/contact-detail-drawer'
+import { ContactLogModal } from '../contacts/contact-log-modal'
+import { ContactFormModal } from '../contacts/contact-form-modal'
 import { KanbanCard } from './kanban-card'
 import type { Contact, Stage, Project } from '@/lib/types'
 
@@ -45,6 +58,7 @@ export function KanbanClient({
   projects,
   lastContactMap,
 }: KanbanClientProps) {
+  const router = useRouter()
   const [contacts, setContacts] = useState<ContactWithRels[]>(initialContacts)
   const [filterProject, setFilterProject] = useState<string>('all')
   const [search, setSearch] = useState('')
@@ -53,6 +67,10 @@ export function KanbanClient({
     stages[0]?.id ?? ''
   )
   const [drawerContact, setDrawerContact] = useState<ContactWithRels | null>(null)
+  const [logContact, setLogContact] = useState<ContactWithRels | null>(null)
+  const [editContact, setEditContact] = useState<ContactWithRels | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<ContactWithRels | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   // All stages passed in are already filtered (no raw, no bad_number)
   const activeStages = stages.filter((s) => !s.is_terminal)
@@ -322,16 +340,73 @@ export function KanbanClient({
           stages={stages}
           projects={projects}
           onClose={() => setDrawerContact(null)}
-          onEdit={() => {}}
-          onDelete={() => {}}
-          onNewLog={() => {}}
+          onEdit={(c) => { setDrawerContact(null); setEditContact(c) }}
+          onDelete={(c) => { setDrawerContact(null); setDeleteTarget(c) }}
+          onNewLog={(c) => { setDrawerContact(null); setLogContact(c) }}
           onZalo={() => {
             const url = `https://zalo.me/${drawerContact.phone.replace(/\s/g, '')}`
             window.open(url, '_blank')
           }}
-          onRefresh={() => {}}
+          onRefresh={() => router.refresh()}
         />
       )}
+
+      {/* Log modal */}
+      {logContact && (
+        <ContactLogModal
+          contact={logContact}
+          stages={stages}
+          onClose={(saved) => {
+            setLogContact(null)
+            if (saved) router.refresh()
+          }}
+        />
+      )}
+
+      {/* Edit modal */}
+      <ContactFormModal
+        open={!!editContact}
+        contact={editContact}
+        projects={projects}
+        onClose={(saved) => {
+          setEditContact(null)
+          if (saved) router.refresh()
+        }}
+      />
+
+      {/* Delete dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xoá liên hệ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Xoá <strong>{deleteTarget?.name}</strong>? Hành động này không thể hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Huỷ</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-white hover:bg-destructive/90"
+              disabled={deleting}
+              onClick={async () => {
+                if (!deleteTarget) return
+                setDeleting(true)
+                const result = await deleteContact(deleteTarget.id)
+                setDeleting(false)
+                if (result.error) {
+                  toast.error('Không thể xoá. Vui lòng thử lại.')
+                } else {
+                  toast.success('Đã xoá liên hệ.')
+                  setDeleteTarget(null)
+                  router.refresh()
+                }
+              }}
+            >
+              {deleting ? 'Đang xoá...' : 'Xoá'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
