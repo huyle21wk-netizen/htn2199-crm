@@ -138,7 +138,7 @@ export function MarkDoneModal({ log, stages, onClose }: MarkDoneModalProps) {
   return (
     <>
       <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Đánh dấu hoàn thành</DialogTitle>
           </DialogHeader>
