@@ -154,6 +154,7 @@ export function ProjectsClient({ initialProjects }: { initialProjects: Project[]
         </div>
       ) : (
         <div className="border border-border rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-secondary/40">
@@ -203,6 +204,7 @@ export function ProjectsClient({ initialProjects }: { initialProjects: Project[]
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
