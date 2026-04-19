@@ -107,7 +107,7 @@ export default function LoginPage() {
                 type="email"
                 placeholder="ten@email.com"
                 autoComplete="email"
-                className="w-full pl-10 pr-3 h-10 rounded-md border border-input bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                className="w-full pl-10 pr-3 h-10 rounded-md border border-input bg-background text-base md:text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 {...register("email")}
               />
             </div>
@@ -128,7 +128,7 @@ export default function LoginPage() {
                 type="password"
                 placeholder="••••••••"
                 autoComplete="current-password"
-                className="w-full pl-10 pr-3 h-10 rounded-md border border-input bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                className="w-full pl-10 pr-3 h-10 rounded-md border border-input bg-background text-base md:text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 {...register("password")}
               />
             </div>

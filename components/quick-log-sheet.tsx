@@ -340,7 +340,7 @@ export function QuickLogSheet({ open, contact, channel, onClose, onOpenFullLog }
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Không có nhu cầu, đã mua chỗ khác..."
-                  className="mt-1 flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="mt-1 flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-base md:text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 />
               </div>
             )}

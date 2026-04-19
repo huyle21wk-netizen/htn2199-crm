@@ -308,14 +308,14 @@ export function ContactsClient({ stages, projects }: ContactsClientProps) {
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
           <Input
-            className="pl-8 h-8 w-44 text-sm"
+            className="pl-8 h-8 w-44 text-base md:text-sm"
             placeholder="Tìm theo tên"
             value={searchName}
             onChange={(e) => setSearchName(e.target.value)}
           />
         </div>
         <Input
-          className="h-8 w-40 text-sm"
+          className="h-8 w-40 text-base md:text-sm"
           placeholder="Tìm theo SĐT"
           value={searchPhone}
           onChange={(e) => setSearchPhone(e.target.value)}
