@@ -241,6 +241,9 @@ export function ImportWizard({ initialProjects }: ImportWizardProps) {
     }
     setExistingPhones(existingMap)
 
+    // Track phones already seen within this file to catch intra-file duplicates
+    const seenInFile = new Map<string, string>() // phone → name of first occurrence
+
     const mapped: MappedRow[] = rows.map((row) => {
       const name = (row.raw[nameCol] ?? '').trim()
       const rawPhone = row.raw[phoneCol] ?? ''
@@ -267,6 +270,11 @@ export function ImportWizard({ initialProjects }: ImportWizardProps) {
           if (existingMap.has(phoneFormatted)) {
             status = 'duplicate'
             dupName = existingMap.get(phoneFormatted)
+          } else if (seenInFile.has(phoneFormatted)) {
+            status = 'duplicate'
+            dupName = `${seenInFile.get(phoneFormatted)} (trùng trong file)`
+          } else {
+            seenInFile.set(phoneFormatted, name)
           }
         }
       }
