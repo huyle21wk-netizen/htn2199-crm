@@ -28,7 +28,7 @@ export function KanbanCard({
         'bg-background border border-border rounded-md p-3 text-sm select-none',
         isDragOverlay
           ? 'shadow-lg rotate-1 opacity-95'
-          : 'hover:shadow-sm cursor-grab active:cursor-grabbing',
+          : 'hover:shadow-sm transition-shadow duration-150 cursor-grab active:cursor-grabbing',
       ].join(' ')}
       onClick={onClick}
     >

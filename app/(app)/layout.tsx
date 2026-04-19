@@ -11,7 +11,7 @@ export default function AppLayout({
       {/* Desktop: offset for sidebar */}
       <main className="md:ml-60 min-h-screen">
         {/* Mobile: offset for top bar */}
-        <div className="pt-14 md:pt-0 p-4 md:p-6 max-w-7xl">
+        <div className="pt-14 md:pt-0 p-4 md:p-6 max-w-7xl animate-in fade-in-0 duration-150">
           {children}
         </div>
       </main>
