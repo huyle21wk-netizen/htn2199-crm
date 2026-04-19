@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/sheet'
 import { createClient } from '@/lib/supabase/client'
 import { phoneForUrl } from '@/lib/phone'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { Contact, ContactLog, Stage, Project } from '@/lib/types'
 import { CHANNEL_LABELS, OUTCOME_LABELS } from '@/lib/types'
 
@@ -187,7 +188,17 @@ export function ContactDetailDrawer({
               </div>
 
               {loading ? (
-                <p className="text-sm text-muted-foreground">Đang tải...</p>
+                <div className="space-y-2">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex gap-3">
+                      <Skeleton className="h-4 w-4 rounded-full shrink-0 mt-0.5" />
+                      <div className="flex-1 space-y-1.5">
+                        <Skeleton className="h-3 w-24" />
+                        <Skeleton className="h-3 w-40" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : logs.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 gap-3 text-center">
                   <div className="p-3 rounded-full bg-secondary">

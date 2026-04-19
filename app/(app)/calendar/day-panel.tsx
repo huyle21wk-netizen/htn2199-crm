@@ -20,6 +20,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Skeleton } from '@/components/ui/skeleton'
 import { ContactDetailDrawer } from '@/app/(app)/contacts/contact-detail-drawer'
 import type { ContactLog, Stage, Project, Contact, LogChannel } from '@/lib/types'
 import { OUTCOME_LABELS } from '@/lib/types'
@@ -176,6 +177,7 @@ function LogCard({
 interface DayPanelProps {
   selectedDay: Date | undefined
   logs: CalendarLogEntry[]
+  loading?: boolean
   overdueMode: boolean
   stages: Stage[]
   projects: Project[]
@@ -187,6 +189,7 @@ interface DayPanelProps {
 export function DayPanel({
   selectedDay,
   logs,
+  loading = false,
   overdueMode,
   stages,
   projects,
@@ -217,7 +220,20 @@ export function DayPanel({
 
       {/* Log list */}
       <ScrollArea className="flex-1 p-3">
-        {logs.length === 0 ? (
+        {loading ? (
+          <div className="space-y-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="border border-border rounded-lg p-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-3 w-10" />
+                  <Skeleton className="h-3 w-3" />
+                  <Skeleton className="h-3 w-28 flex-1" />
+                </div>
+                <Skeleton className="h-3 w-20 ml-12" />
+              </div>
+            ))}
+          </div>
+        ) : logs.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-10 gap-3 text-center">
             <div className="p-3 rounded-full bg-secondary">
               <CalendarDays className="h-6 w-6 text-muted-foreground" />

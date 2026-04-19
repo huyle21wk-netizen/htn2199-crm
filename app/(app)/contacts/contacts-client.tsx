@@ -46,6 +46,7 @@ import {
 import { createClient } from '@/lib/supabase/client'
 import { phoneForUrl } from '@/lib/phone'
 import { deleteContact } from '@/app/actions/contacts'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { Contact, Stage, Project } from '@/lib/types'
 import { ContactFormModal } from './contact-form-modal'
 import { ContactDetailDrawer } from './contact-detail-drawer'
@@ -304,8 +305,33 @@ export function ContactsClient({ stages, projects }: ContactsClientProps) {
 
       {/* Table */}
       {loading ? (
-        <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">
-          Đang tải...
+        <div className="border border-border rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-secondary/40">
+                  <th className="text-left px-3 py-2"><Skeleton className="h-3 w-12" /></th>
+                  <th className="text-left px-3 py-2"><Skeleton className="h-3 w-16" /></th>
+                  <th className="text-left px-3 py-2 hidden sm:table-cell"><Skeleton className="h-3 w-14" /></th>
+                  <th className="text-left px-3 py-2 hidden md:table-cell"><Skeleton className="h-3 w-12" /></th>
+                  <th className="text-left px-3 py-2 hidden lg:table-cell"><Skeleton className="h-3 w-18" /></th>
+                  <th className="text-right px-3 py-2"><Skeleton className="h-3 w-14 ml-auto" /></th>
+                </tr>
+              </thead>
+              <tbody>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <tr key={i} className="border-b border-border last:border-0">
+                    <td className="px-3 py-2"><Skeleton className="h-3 w-28" /></td>
+                    <td className="px-3 py-2"><Skeleton className="h-3 w-24" /></td>
+                    <td className="px-3 py-2 hidden sm:table-cell"><Skeleton className="h-3 w-20" /></td>
+                    <td className="px-3 py-2 hidden md:table-cell"><Skeleton className="h-3 w-16" /></td>
+                    <td className="px-3 py-2 hidden lg:table-cell"><Skeleton className="h-3 w-18" /></td>
+                    <td className="px-3 py-2"><div className="flex justify-end gap-1"><Skeleton className="h-6 w-6 rounded" /><Skeleton className="h-6 w-6 rounded" /><Skeleton className="h-6 w-6 rounded" /></div></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : contacts.length === 0 ? (
         <EmptyState

@@ -22,6 +22,7 @@ export function CalendarClient({ stages, projects }: CalendarClientProps) {
   const [currentMonth, setCurrentMonth] = useState(() => new Date())
   const [selectedDay, setSelectedDay] = useState<Date>(() => new Date())
   const [logs, setLogs] = useState<CalendarLogEntry[]>([])
+  const [logsLoading, setLogsLoading] = useState(true)
   const [overdueFilter, setOverdueFilter] = useState(false)
   const [markDoneLog, setMarkDoneLog] = useState<CalendarLogEntry | null>(null)
   const [showSelectContact, setShowSelectContact] = useState(false)
@@ -29,6 +30,7 @@ export function CalendarClient({ stages, projects }: CalendarClientProps) {
   const supabase = createClient()
 
   const fetchLogs = useCallback(async () => {
+    setLogsLoading(true)
     const start = startOfMonth(currentMonth)
     const end = endOfMonth(currentMonth)
     const { data } = await supabase
@@ -38,6 +40,7 @@ export function CalendarClient({ stages, projects }: CalendarClientProps) {
       .lte('scheduled_for', end.toISOString())
       .order('scheduled_for', { ascending: true })
     setLogs((data as CalendarLogEntry[]) ?? [])
+    setLogsLoading(false)
   }, [currentMonth])
 
   useEffect(() => { fetchLogs() }, [fetchLogs])
@@ -168,6 +171,7 @@ export function CalendarClient({ stages, projects }: CalendarClientProps) {
           <DayPanel
             selectedDay={selectedDay}
             logs={displayedLogs}
+            loading={logsLoading}
             overdueMode={overdueFilter}
             stages={stages}
             projects={projects}
