@@ -456,8 +456,8 @@ export function ImportWizard({ initialProjects }: ImportWizardProps) {
           </p>
 
           {/* Preview */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs border border-border rounded-lg overflow-hidden">
+          <div className="overflow-x-auto border border-border rounded-lg overflow-hidden">
+            <table className="w-full text-xs">
               <thead>
                 <tr className="bg-secondary/40 border-b border-border">
                   {headers.map((h) => (
