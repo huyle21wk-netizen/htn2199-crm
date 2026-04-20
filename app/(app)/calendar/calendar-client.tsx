@@ -144,7 +144,7 @@ export function CalendarClient({ stages, projects }: CalendarClientProps) {
       <div className="flex flex-col md:flex-row gap-4 items-start">
         {/* Calendar */}
         <div className="w-full md:w-3/5">
-          <div className="border border-border rounded-lg p-2 overflow-hidden">
+          <div className="border border-border rounded-lg p-2">
             <Calendar
               mode="single"
               selected={selectedDay}
